@@ -15,6 +15,7 @@ jobs:
           # https://github.com/oprypin/nightly.link/blob/master/.github/workflows/pr-comment.yml
           # https://github.com/AKSW/submission.d2r2.aksw.org/blob/main/.github/workflows/pr-comment.yml
           script: |
+            // get a PR number
             const {owner, repo} = context.repo;
             const pullHeadSHA = '${{github.event.workflow_run.head_sha}}';
             const pullUserId = ${{github.event.sender.id}};
@@ -32,6 +33,7 @@ jobs:
               return core.error("This workflow doesn't match any pull requests!");
             }
 
+            // collect all artifacts
             let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -49,6 +51,7 @@ jobs:
 
             body += `\n\n See [Testing a PR](https://ddev.readthedocs.io/en/latest/developers/building-contributing/#testing-a-pr)`;
 
+            // insert or update a bot comment
             async function upsertComment(owner, repo, issue_number, purpose, body) {
               const {data: comments} = await github.rest.issues.listComments(
                 {owner, repo, issue_number});
