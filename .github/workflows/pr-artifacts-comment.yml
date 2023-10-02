@@ -15,28 +15,6 @@ jobs:
           # https://github.com/oprypin/nightly.link/blob/master/.github/workflows/pr-comment.yml
           # https://github.com/AKSW/submission.d2r2.aksw.org/blob/main/.github/workflows/pr-comment.yml
           script: |
-            async function upsertComment(owner, repo, issue_number, purpose, body) {
-              const {data: comments} = await github.rest.issues.listComments(
-                {owner, repo, issue_number});
-
-              const marker = `<!-- bot: ${purpose} -->`;
-              body = marker + "\n" + body;
-
-              const existing = comments.filter((c) => c.body.includes(marker));
-              if (existing.length > 0) {
-                const last = existing[existing.length - 1];
-                core.info(`Updating comment ${last.id}`);
-                await github.rest.issues.updateComment({
-                  owner, repo,
-                  body,
-                  comment_id: last.id,
-                });
-              } else {
-                core.info(`Creating a comment in issue / PR #${issue_number}`);
-                await github.rest.issues.createComment({issue_number, body, owner, repo});
-              }
-            }
-
             const {owner, repo} = context.repo;
             const pullHeadSHA = '${{github.event.workflow_run.head_sha}}';
             const pullUserId = ${{github.event.sender.id}};
@@ -71,6 +49,25 @@ jobs:
 
             body += `\n\n See [Testing a PR](https://ddev.readthedocs.io/en/latest/developers/building-contributing/#testing-a-pr)`;
 
-            core.info("Review thread message body:", body);
+            async function upsertComment(owner, repo, issue_number, purpose, body) {
+              const {data: comments} = await github.rest.issues.listComments(
+                {owner, repo, issue_number});
 
+              const marker = `<!-- bot: ${purpose} -->`;
+              body = marker + "\n" + body;
+
+              const existing = comments.filter((c) => c.body.includes(marker));
+              if (existing.length > 0) {
+                const last = existing[existing.length - 1];
+                core.info(`Updating comment ${last.id}`);
+                await github.rest.issues.updateComment({
+                  owner, repo,
+                  body,
+                  comment_id: last.id,
+                });
+              } else {
+                core.info(`Creating a comment in issue / PR #${issue_number}`);
+                await github.rest.issues.createComment({issue_number, body, owner, repo});
+              }
+            }
             await upsertComment(owner, repo, prNumber, "nightly-link", body);
