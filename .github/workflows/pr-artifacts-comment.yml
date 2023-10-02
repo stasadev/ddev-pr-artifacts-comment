@@ -13,6 +13,8 @@ jobs:
         with:
           # This snippet is public-domain, taken from
           # https://github.com/oprypin/nightly.link/blob/master/.github/workflows/pr-comment.yml
+          # Getting a PR Number with a snippet from
+          # https://github.com/AKSW/submission.d2r2.aksw.org/blob/main/.github/workflows/pr-comment.yml
           script: |
             async function upsertComment(owner, repo, issue_number, purpose, body) {
               const {data: comments} = await github.rest.issues.listComments(
@@ -37,10 +39,19 @@ jobs:
             }
 
             const {owner, repo} = context.repo;
-            const run_id = ${{github.event.workflow_run.id}};
-
-            const pull_requests = ${{ toJSON(github.event.workflow_run.pull_requests) }};
-            if (!pull_requests.length) {
+            const pullHeadSHA = '${{github.event.workflow_run.head_sha}}';
+            const pullUserId = ${{github.event.sender.id}};
+            const prNumber = await (async () => {
+              const pulls = await github.rest.pulls.list({owner, repo});
+              for await (const {data} of github.paginate.iterator(pulls)) {
+                for (const pull of data) {
+                  if (pull.head.sha === pullHeadSHA && pull.user.id === pullUserId) {
+                    return pull.number;
+                  }
+                }
+              }
+            })();
+            if (!prNumber) {
               return core.error("This workflow doesn't match any pull requests!");
             }
 
@@ -54,9 +65,8 @@ jobs:
               body += `\n* [${art.name}.zip](https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip)`;
             }
 
+            body += `\n\n See [Testing a PR](https://ddev.readthedocs.io/en/latest/developers/building-contributing/#testing-a-pr)`;
+
             core.info("Review thread message body:", body);
 
-            for (const pr of pull_requests) {
-              await upsertComment(owner, repo, pr.number,
-                "nightly-link", body);
-            }
+            await upsertComment(owner, repo, pr.number, "nightly-link", body);
