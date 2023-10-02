@@ -1,0 +1,28 @@
+name: PR Build
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "test/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Test Artifact
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p path/to/artifact
+      - run: echo hello > path/to/artifact/world.txt
+      - uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: path/to/artifact/world.txt
