@@ -5,6 +5,8 @@ on:
     types: [completed]
 
 jobs:
+  # This snippet is public-domain, taken from
+  # https://github.com/AKSW/submission.d2r2.aksw.org/blob/main/.github/workflows/pr-comment.yml
   pr_comment:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
