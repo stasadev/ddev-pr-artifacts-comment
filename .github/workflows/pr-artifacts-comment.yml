@@ -3,7 +3,13 @@ on:
   workflow_run:
     workflows: ['PR Build']
     types: [completed]
+env:
+  HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
 jobs:
   pr_comment:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
@@ -49,8 +55,8 @@ jobs:
 
             body += `\n\n See [Testing a PR](https://ddev.readthedocs.io/en/latest/developers/building-contributing/#testing-a-pr)` + `.`;
 
-            body += `\n\n* [<img src="https://ddev.com/img/open-in-gitpod.svg" alt="Test on Gitpod">](https://gitpod.io/?autostart=true#https://github.com/` + context.repo.owner + `/` + context.repo.repo + `/pull/` + prNumber + `).`;
-            body += `\n* [<img src="https://github.com/codespaces/badge.svg" alt="Test on GitHub Codespaces">](https://codespaces.new/` + context.repo.owner + `/` + context.repo.repo + `/pull/` + prNumber + `).`;
+            body += `\n\n[<img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Test on Gitpod">](https://gitpod.io/?autostart=true#https://github.com/` + context.repo.owner + `/` + context.repo.repo + `/pull/` + prNumber + `).`;
+            body += `\n\n[<img src="https://github.com/codespaces/badge.svg" alt="Test on GitHub Codespaces">](https://codespaces.new/` + context.repo.owner + `/` + context.repo.repo + `/pull/` + prNumber + `).`;
 
             // insert or update a bot comment
             async function upsertComment(owner, repo, issue_number, purpose, body) {
