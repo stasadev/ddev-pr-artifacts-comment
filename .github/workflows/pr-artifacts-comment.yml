@@ -105,12 +105,17 @@ jobs:
             /**
              * Handle and log errors with detailed context and exit the process.
              * @param {Error} error - The error object.
-             * @param {string} message - Description of the context where the error occurred.
+             * @param {string} description - Description of the context where the error occurred.
              */
-            function handleError(error, message) {
-              core.error(`Failed to ${message}: ${error.message}`);
+            function handleError(error, description, prNumber) {
+              core.error(`Failed to ${description}`);
+              core.error(`Message: ${error.message}`);
               core.error(`Stack Trace: ${error.stack || 'No stack trace available'}`);
-              core.error(`Context Info: Owner - ${context.repo.owner}, Repo - ${context.repo.repo}, SHA - ${{github.event.workflow_run.head_sha}}, Run ID - ${context.payload.workflow_run.id}`);
+              core.error(`Owner: ${context.repo.owner}, Repo: ${context.repo.repo}`);
+              core.error(`SHA: ${{github.event.workflow_run.head_sha}}`);
+              if (prNumber) {
+                core.error(`PR Number: ${prNumber}`);
+              }
               process.exit(1);
             }
 
@@ -123,7 +128,7 @@ jobs:
               ({ prNumber, prRef, prRepoId } = await fetchPRDetails());
               core.info(`Found PR: #${prNumber}, Ref: ${prRef}, Repo ID: ${prRepoId}`);
             } catch (error) {
-              handleError(error, 'fetch PR details');
+              handleError(error, 'fetch PR details', undefined);
             }
 
             // Fetch all artifacts
@@ -132,7 +137,7 @@ jobs:
               allArtifacts = await fetchAllArtifacts();
               core.info(`Artifacts fetched successfully`);
             } catch (error) {
-              handleError(error, 'fetch artifacts');
+              handleError(error, 'fetch artifacts', prNumber);
             }
 
             // Construct the comment body
@@ -154,5 +159,5 @@ jobs:
               await upsertComment(prNumber, "nightly-link", body);
               core.info("Comment created/updated successfully");
             } catch (error) {
-              handleError(error, 'create/update comment');
+              handleError(error, 'create/update comment', prNumber);
             }
