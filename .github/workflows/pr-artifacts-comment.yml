@@ -53,7 +53,6 @@ jobs:
              * @throws {Error} If no artifacts are found.
              */
             async function fetchAllArtifacts() {
-              throw new Error("No artifacts found for the workflow run");
               const artifactsResponse = await github.rest.actions.listWorkflowRunArtifacts({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
