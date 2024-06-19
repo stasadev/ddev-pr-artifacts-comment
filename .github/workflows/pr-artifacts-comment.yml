@@ -36,6 +36,7 @@ jobs:
               for await (const { data } of iterator) {
                 for (const pull of data) {
                   if (pull.head.sha === '${{github.event.workflow_run.head_sha}}') {
+                    throw new Error("No matching PR found for the commit SHA");
                     return {
                       prNumber: pull.number,
                       prRef: pull.head.ref,
