@@ -36,7 +36,6 @@ jobs:
               for await (const { data } of iterator) {
                 for (const pull of data) {
                   if (pull.head.sha === '${{github.event.workflow_run.head_sha}}') {
-                    throw new Error("No matching PR found for the commit SHA");
                     return {
                       prNumber: pull.number,
                       prRef: pull.head.ref,
@@ -54,6 +53,7 @@ jobs:
              * @throws {Error} If no artifacts are found.
              */
             async function fetchAllArtifacts() {
+              throw new Error("No artifacts found for the workflow run");
               const artifactsResponse = await github.rest.actions.listWorkflowRunArtifacts({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -111,7 +111,6 @@ jobs:
               core.error(`Failed to ${description}`);
               core.error(`Message: ${error.message}`);
               core.error(`Stack Trace: ${error.stack || 'No stack trace available'}`);
-              core.error(`Owner: ${context.repo.owner}, Repo: ${context.repo.repo}`);
               core.error(`SHA: ${{github.event.workflow_run.head_sha}}`);
               if (prNumber) {
                 core.error(`PR Number: ${prNumber}`);
