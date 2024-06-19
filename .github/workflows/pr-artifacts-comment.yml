@@ -29,6 +29,7 @@ jobs:
              * @throws {Error} If no matching PR is found.
              */
             async function fetchPRDetails() {
+              throw new Error("No matching PR found for the commit SHA");
               const iterator = github.paginate.iterator(github.rest.pulls.list, {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -110,10 +111,11 @@ jobs:
               core.error(`Failed to ${description}`);
               core.error(`Message: ${error.message}`);
               core.error(`Stack Trace: ${error.stack || 'No stack trace available'}`);
-              core.error(`SHA: ${{github.event.workflow_run.head_sha}}`);
               if (prNumber) {
                 core.error(`PR Number: ${prNumber}`);
               }
+              core.error(`PRs: https://api.github.com/repos/${context.repo.owner}/${context.repo.repo}/pulls`);
+              core.error(`SHA: ${{github.event.workflow_run.head_sha}}`);
               process.exit(1);
             }
 
