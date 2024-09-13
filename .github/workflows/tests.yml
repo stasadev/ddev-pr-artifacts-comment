@@ -61,4 +61,4 @@ jobs:
           DDEV_PANTHEON_SSH_KEY: "op://test-secrets/DDEV_PANTHEON_SSH_KEY/private key?ssh-format=openssh"
           DDEV_PLATFORM_API_TOKEN: "op://test-secrets/DDEV_PLATFORM_API_TOKEN/credential"
           DDEV_UPSUN_API_TOKEN: "op://test-secrets/DDEV_UPSUN_API_TOKEN/credential"
-        if: ${{ secrets.TESTS_SERVICE_ACCOUNT_TOKEN != '' }}
+        if: ${{ env.OP_SERVICE_ACCOUNT_TOKEN != '' }}
