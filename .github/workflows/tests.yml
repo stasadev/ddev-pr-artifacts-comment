@@ -1,0 +1,64 @@
+name: Tests
+on:
+  pull_request:
+    paths:
+      - "go.*"
+      - "pkg/**"
+      - "cmd/**"
+      - "Makefile"
+      - "vendor/**"
+      - ".github/workflows/**"
+  push:
+    branches: [ master, main ]
+
+#  schedule:
+#    - cron: '01 00 * * *'
+
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Run the build with tmate set "debug_enabled"'
+        type: boolean
+        required: false
+        default: false
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Date
+        id: get-date
+        run: |
+          echo "date=$(/bin/date -u "+%Y%V")" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Load 1password secret(s) for push-pull-test-platforms
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: "${{ secrets.TESTS_SERVICE_ACCOUNT_TOKEN }}"
+          DDEV_ACQUIA_API_KEY: "op://test-secrets/DDEV_ACQUIA_API_KEY/credential"
+          DDEV_ACQUIA_API_SECRET: "op://test-secrets/DDEV_ACQUIA_API_SECRET/credential"
+          DDEV_ACQUIA_SSH_KEY: "op://test-secrets/DDEV_ACQUIA_SSH_KEY/private key?ssh-format=openssh"
+          DDEV_LAGOON_SSH_KEY: "op://test-secrets/DDEV_LAGOON_SSH_KEY/private key?ssh-format=openssh"
+          DDEV_PANTHEON_API_TOKEN: "op://test-secrets/DDEV_PANTHEON_API_TOKEN/credential"
+          DDEV_PANTHEON_SSH_KEY: "op://test-secrets/DDEV_PANTHEON_SSH_KEY/private key?ssh-format=openssh"
+          DDEV_PLATFORM_API_TOKEN: "op://test-secrets/DDEV_PLATFORM_API_TOKEN/credential"
+          DDEV_UPSUN_API_TOKEN: "op://test-secrets/DDEV_UPSUN_API_TOKEN/credential"
+        if: ${{ secrets.TESTS_SERVICE_ACCOUNT_TOKEN != '' }}
