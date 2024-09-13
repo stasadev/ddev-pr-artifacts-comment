@@ -1,13 +1,6 @@
 name: Tests
 on:
   pull_request:
-    paths:
-      - "go.*"
-      - "pkg/**"
-      - "cmd/**"
-      - "Makefile"
-      - "vendor/**"
-      - ".github/workflows/**"
   push:
     branches: [ master, main ]
 
