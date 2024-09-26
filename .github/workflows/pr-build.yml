@@ -10,6 +10,14 @@ on:
       - ".github/workflows/**"
       - "test/**"
 
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Run the build with tmate set "debug_enabled"'
+        type: boolean
+        required: false
+        default: false
+
 permissions:
   contents: read
 
@@ -22,6 +30,12 @@ jobs:
       - uses: actions/checkout@v4
       - run: mkdir -p path/to/artifact
       - run: echo hello > path/to/artifact/world.txt
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
 
       - name: Upload all artifacts
         uses: actions/upload-artifact@v4
